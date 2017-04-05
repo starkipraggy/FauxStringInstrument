@@ -7,13 +7,16 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Surface;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.billthefarmer.mididriver.MidiDriver;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import icepick.State;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,23 +24,46 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.tv_note)
     TextView tvNote;
 
+    @BindView(R.id.button_hold_note)
+    Button buttonHoldNote;
+
+    @BindView(R.id.button_play)
+    Button buttonPlay;
+
+    @OnClick(R.id.button_play)
+    void onClickPlay() {
+        canPlay = !canPlay;
+        buttonPlay.setText(canPlay ? R.string.button_pause : R.string.button_play);
+    }
+
     @State
     int currentNoteNumber;
 
     private SensorManager sensorManager;
-    private final float[] rotationMatrix = new float[9];
-    private final float[] remappedMatrix = new float[9];
-    private final float[] orientationAngles = new float[3];
 
     private MidiDriver midiDriver;
     private byte[] event;
 
+    private NoteUtil.Note previousNote = NoteUtil.Note.INVALID;
+    private int sameNoteCount;
+
+    private boolean isHoldingNote;
+
+    private boolean canPlay;
+
     private SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-                SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-                updateOrientation();
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                float ax = event.values[0];
+                float ay = event.values[1];
+                float az = event.values[2];
+
+                float anglexy = (float) (Math.atan2(ax, ay) / (Math.PI / 180));
+                float anglexz = (float) (Math.atan2(ax, az) / (Math.PI / 180));
+                float angleyz = (float) (Math.atan2(ay, az) / (Math.PI / 180));
+
+                play(anglexy);
             }
         }
 
@@ -54,8 +80,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        resetRotationMatrix();
         midiDriver = new MidiDriver();
+        buttonHoldNote.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    isHoldingNote = true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    isHoldingNote = false;
+                }
+                return true;
+            }
+        });
     }
 
 
@@ -64,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         sensorManager.registerListener(
                 sensorEventListener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
-                SensorManager.SENSOR_DELAY_FASTEST);
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME);
         midiDriver.start();
     }
 
@@ -76,58 +112,26 @@ public class MainActivity extends AppCompatActivity {
         midiDriver.stop();
     }
 
-    private void resetRotationMatrix() {
-        rotationMatrix[0] = 1;
-        rotationMatrix[4] = 1;
-        rotationMatrix[8] = 1;
-    }
-
-    private void updateOrientation() {
-        switch (getWindowManager().getDefaultDisplay().getRotation()) {
-            case Surface.ROTATION_0:
-            default:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_X,
-                        SensorManager.AXIS_Z,
-                        remappedMatrix);
-                break;
-            case Surface.ROTATION_90:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_Z,
-                        SensorManager.AXIS_MINUS_X,
-                        remappedMatrix);
-                break;
-            case Surface.ROTATION_180:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_MINUS_X,
-                        SensorManager.AXIS_MINUS_Z,
-                        remappedMatrix);
-                break;
-            case Surface.ROTATION_270:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_MINUS_Z,
-                        SensorManager.AXIS_X,
-                        remappedMatrix);
-                break;
+    private void play(float angle) {
+        NoteUtil.Note note = NoteUtil.getNote(angle);
+        if (note != previousNote) {
+            sameNoteCount = 0;
+        } else {
+            sameNoteCount++;
         }
-        SensorManager.getOrientation(remappedMatrix, orientationAngles);
-        float pitch = Math.abs(SensorUtil.degreeFromRadian(orientationAngles[1]));
-        float roll = Math.abs(SensorUtil.degreeFromRadian(orientationAngles[2]));
-        play(pitch, roll);
-    }
-
-    private void play(float pitch, float roll) {
-        NoteUtil.Note note = NoteUtil.getNote(pitch, roll);
-        if (note.number != currentNoteNumber) {
-            stopNote(currentNoteNumber);
+        if (sameNoteCount > SensorUtil.SAME_NOTE_COUNT) {
+            if (!isHoldingNote && note.number != currentNoteNumber) {
+                stopNote(currentNoteNumber);
+                currentNoteNumber = note.number;
+                playNote(currentNoteNumber);
+            }
             tvNote.setText(note.name);
-            currentNoteNumber = note.number;
-            playNote(currentNoteNumber);
         }
+        previousNote = note;
     }
 
     private void playNote(int noteNumber) {
-        if (noteNumber < 0) return;
+        if (!canPlay || noteNumber < 0) return;
 
         // Construct a note ON message for the note at maximum velocity on channel 1:
         event = new byte[3];

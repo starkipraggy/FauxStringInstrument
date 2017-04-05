@@ -19,7 +19,7 @@ public class NoteUtil {
         public final int number;
         public final String name;
 
-        private Note(String name, int number) {
+        Note(String name, int number) {
             this.name = name;
             this.number = number;
         }
@@ -40,9 +40,9 @@ public class NoteUtil {
             Note.B
     };
 
-    public static Note getNote(float pitch, float roll) {
-        if (Math.abs(pitch) > 50 || Math.abs(roll) < 10) return Note.INVALID;
-        int index = ((int) Math.abs(roll) / 10) - 1;
+    public static Note getNote(float angle) {
+        if (Math.abs(angle) < 10) return Note.INVALID;
+        int index = ((int) Math.abs(angle) / 10) - 1;
         if (index < NOTES.length) return NOTES[index];
         return Note.INVALID;
     }

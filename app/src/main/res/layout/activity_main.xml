@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="cs4347.group1.fauxstringinstrument.MainActivity">
+       xmlns:tools="http://schemas.android.com/tools"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       tools:context="cs4347.group1.fauxstringinstrument.MainActivity">
 
     <TextView
         android:id="@+id/tv_note"
@@ -11,6 +11,28 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textSize="50sp"
-        tools:text="Note" />
+        tools:text="Note"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_play"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_play"/>
+
+        <Button
+            android:id="@+id/button_hold_note"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_hold_note"/>
+
+    </LinearLayout>
 
 </merge>
