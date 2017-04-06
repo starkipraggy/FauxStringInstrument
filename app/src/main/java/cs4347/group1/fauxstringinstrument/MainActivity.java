@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.billthefarmer.mididriver.GeneralMidiConstants;
 import org.billthefarmer.mididriver.MidiDriver;
 
 import butterknife.BindView;
@@ -30,10 +31,26 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.button_play)
     Button buttonPlay;
 
+    @BindView(R.id.button_piano)
+    Button buttonPiano;
+
+    @BindView(R.id.button_vibraphone)
+    Button buttonVibraphone;
+
     @OnClick(R.id.button_play)
     void onClickPlay() {
         canPlay = !canPlay;
         buttonPlay.setText(canPlay ? R.string.button_pause : R.string.button_play);
+    }
+
+    @OnClick(R.id.button_piano)
+    void changeToPiano() {
+        changeInstrument(GeneralMidiConstants.ACOUSTIC_GRAND_PIANO);
+    }
+
+    @OnClick(R.id.button_vibraphone)
+    void changeToVibraphone() {
+        changeInstrument(GeneralMidiConstants.VIBRAPHONE);
     }
 
     @State
@@ -43,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MidiDriver midiDriver;
     private byte[] event;
+    // private byte currentInstrument;
 
     private NoteUtil.Note previousNote = NoteUtil.Note.INVALID;
     private int sameNoteCount;
@@ -130,10 +148,23 @@ public class MainActivity extends AppCompatActivity {
         previousNote = note;
     }
 
+    private void changeInstrument(byte instrument){
+        event = new byte[2];
+        event[0] = (byte) 0xC0;
+        event[1] = instrument;
+        midiDriver.write(event);
+    }
+
     private void playNote(int noteNumber) {
         if (!canPlay || noteNumber < 0) return;
 
         // Construct a note ON message for the note at maximum velocity on channel 1:
+//        event = new byte[3];
+//        event[0] = (byte) 0xC0;
+//        event[1] = (byte) GeneralMidiConstants.VIBRAPHONE;
+//        event[2] = (byte) 0x00;
+//        midiDriver.write(event);
+
         event = new byte[3];
         event[0] = (byte) (0x90 | 0x00);  // 0x90 = note On, 0x00 = channel 1
         event[1] = (byte) noteNumber;

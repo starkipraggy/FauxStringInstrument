@@ -3,4 +3,6 @@
     <string name="button_hold_note">Hold</string>
     <string name="button_pause">Pause</string>
     <string name="button_play">Play</string>
+    <string name="button_piano">Piano</string>
+    <string name="button_vibraphone">Vibraphone</string>
 </resources>
