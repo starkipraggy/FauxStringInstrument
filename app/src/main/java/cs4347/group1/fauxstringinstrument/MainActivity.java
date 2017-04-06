@@ -66,8 +66,12 @@ public class MainActivity extends AppCompatActivity {
     private int sameNoteCount;
 
     private boolean isHoldingNote;
-
     private boolean canPlay;
+
+    private int currentOctave;
+    private boolean octaveUp;
+    private boolean octaveDown;
+    private int octaveChangingEvents;
 
     private SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
@@ -81,7 +85,9 @@ public class MainActivity extends AppCompatActivity {
                 float anglexz = (float) (Math.atan2(ax, az) / (Math.PI / 180));
                 float angleyz = (float) (Math.atan2(ay, az) / (Math.PI / 180));
 
-                play(anglexy);
+                if (!changeOctave(anglexz)) {
+                    play(anglexy, anglexz);
+                }
             }
         }
 
@@ -130,17 +136,56 @@ public class MainActivity extends AppCompatActivity {
         midiDriver.stop();
     }
 
-    private void play(float angle) {
-        NoteUtil.Note note = NoteUtil.getNote(angle);
+    private boolean changeOctave(float pitch) {
+        if (Math.abs(pitch) < 60) {
+            octaveChangingEvents++;
+            if (Math.abs(pitch) < 50) {
+                octaveUp = true;
+            }
+        } else if (Math.abs(pitch) > 90) {
+            octaveChangingEvents++;
+            if (Math.abs(pitch) > 100) {
+                octaveDown = true;
+            }
+        } else {
+            boolean octaveChange = false;
+            if (octaveChangingEvents < 9) {
+                if (octaveUp) {
+                    currentOctave++;
+                    if (currentOctave > 3) {
+                        currentOctave = 3;
+                    } else {
+                        octaveChange = true;
+                    }
+                    octaveUp = false;
+                } else if (octaveDown) {
+                    currentOctave--;
+                    if (currentOctave < -3) {
+                        currentOctave = -3;
+                    } else {
+                        octaveChange = true;
+                    }
+                    octaveDown = false;
+                }
+            }
+            octaveChangingEvents = 0;
+            return octaveChange;
+        }
+        return false;
+    }
+
+    private void play(float roll, float pitch) {
+        NoteUtil.Note note = NoteUtil.getNote(roll, pitch);
         if (note != previousNote) {
             sameNoteCount = 0;
         } else {
             sameNoteCount++;
         }
         if (sameNoteCount > SensorUtil.SAME_NOTE_COUNT) {
-            if (!isHoldingNote && note.number != currentNoteNumber) {
+            int newNoteNumber = NoteUtil.getNoteNumber(note.number, currentOctave);
+            if (!isHoldingNote && newNoteNumber != currentNoteNumber) {
                 stopNote(currentNoteNumber);
-                currentNoteNumber = note.number;
+                currentNoteNumber = newNoteNumber;
                 playNote(currentNoteNumber);
             }
             tvNote.setText(note.name);

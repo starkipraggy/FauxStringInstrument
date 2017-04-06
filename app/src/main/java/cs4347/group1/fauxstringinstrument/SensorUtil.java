@@ -2,7 +2,8 @@ package cs4347.group1.fauxstringinstrument;
 
 public final class SensorUtil {
 
-    public static final int SAME_NOTE_COUNT = 1;
+    public static final int SAME_NOTE_COUNT = 2;
+
     public static float[] prevGravity = {0.0f, 0.0f, 0.0f};
 
     public static float degreeFromRadian(float radian) {

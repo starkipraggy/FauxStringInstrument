@@ -40,10 +40,17 @@ public class NoteUtil {
             Note.B
     };
 
-    public static Note getNote(float angle) {
-        if (Math.abs(angle) < 10) return Note.INVALID;
-        int index = ((int) Math.abs(angle) / 10) - 1;
+    public static Note getNote(float roll, float pitch) {
+        if (Math.abs(roll) < 30 || Math.abs(pitch) < 60 || Math.abs(pitch) > 90) {
+            return Note.INVALID;
+        }
+        int index = ((int) (Math.abs(roll) - 20) / 10) - 1;
         if (index < NOTES.length) return NOTES[index];
         return Note.INVALID;
+    }
+
+    public static int getNoteNumber(int noteNumber, int octave) {
+        if (Math.abs(octave) > 3) return -1;
+        return noteNumber + 12 * octave;
     }
 }
