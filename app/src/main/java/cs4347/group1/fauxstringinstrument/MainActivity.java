@@ -65,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private NoteUtil.Note previousNote = NoteUtil.Note.INVALID;
     private int sameNoteCount;
 
+    private float pastZAngle;
+    private int sameAngleCount;
+
     private boolean isHoldingNote;
     private boolean canPlay;
 
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!changeOctave(anglexz)) {
                     play(anglexy, anglexz);
+                    pitchBend(az);
                 }
             }
         }
@@ -191,6 +195,15 @@ public class MainActivity extends AppCompatActivity {
             tvNote.setText(note.name);
         }
         previousNote = note;
+    }
+
+    private void pitchBend(float angle) {
+        if(angle != pastZAngle) {
+            sameAngleCount = 0;
+        } else {
+            sameAngleCount++;
+        }
+        pastZAngle = angle;
     }
 
     private void changeInstrument(byte instrument){
