@@ -6,14 +6,18 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
 import org.billthefarmer.mididriver.GeneralMidiConstants;
 import org.billthefarmer.mididriver.MidiDriver;
+
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.tv_note)
     TextView tvNote;
+
+    @BindView(R.id.tv_octave)
+    TextView tvOctave;
 
     @BindView(R.id.button_hold_note)
     Button buttonHoldNote;
@@ -74,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentOctave;
     private boolean octaveUp;
     private boolean octaveDown;
-    private int octaveChangingEvents;
+    private long octaveChangingTime;
 
     private SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
@@ -109,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         midiDriver = new MidiDriver();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         buttonHoldNote.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -116,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     isHoldingNote = true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     isHoldingNote = false;
+                    playNote(currentNoteNumber);
                 }
                 return true;
             }
@@ -142,18 +151,23 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean changeOctave(float pitch) {
         if (Math.abs(pitch) < 60) {
-            octaveChangingEvents++;
-            if (Math.abs(pitch) < 50) {
+            if (octaveChangingTime == 0) {
+                octaveChangingTime = System.nanoTime();
+            }
+            if (Math.abs(pitch) < 40) {
                 octaveUp = true;
             }
         } else if (Math.abs(pitch) > 90) {
-            octaveChangingEvents++;
-            if (Math.abs(pitch) > 100) {
+            if (octaveChangingTime == 0) {
+                octaveChangingTime = System.nanoTime();
+            }
+            if (Math.abs(pitch) > 110) {
                 octaveDown = true;
             }
         } else {
             boolean octaveChange = false;
-            if (octaveChangingEvents < 9) {
+            long deltaTime = System.nanoTime() - octaveChangingTime;
+            if (deltaTime < 1000000000) {
                 if (octaveUp) {
                     currentOctave++;
                     if (currentOctave > 3) {
@@ -172,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                     octaveDown = false;
                 }
             }
-            octaveChangingEvents = 0;
+            octaveChangingTime = 0;
             return octaveChange;
         }
         return false;
@@ -192,7 +206,10 @@ public class MainActivity extends AppCompatActivity {
                 currentNoteNumber = newNoteNumber;
                 playNote(currentNoteNumber);
             }
-            tvNote.setText(note.name);
+            String octDisplay = String.format(Locale.UK,"Octave: %d", currentOctave+3);
+            tvOctave.setText(octDisplay);
+            String noteDisplay = String.format(Locale.UK,"Note: %s", note.name);
+            tvNote.setText(noteDisplay);
         }
         previousNote = note;
     }
@@ -220,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
 //        event = new byte[3];
 //        event[0] = (byte) 0xC0;
 //        event[1] = (byte) GeneralMidiConstants.VIBRAPHONE;
-//        event[2] = (byte) 0x00;
+//        event[2] = (byte) 0x00;.
 //        midiDriver.write(event);
 
         event = new byte[3];
