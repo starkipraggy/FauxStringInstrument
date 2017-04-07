@@ -12,6 +12,7 @@ import android.text.Html;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,6 +22,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import org.billthefarmer.mididriver.GeneralMidiConstants;
 import org.billthefarmer.mididriver.MidiDriver;
 
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -44,27 +46,11 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.spinner)
     Spinner instrSelect;
 
-    @BindView(R.id.button_piano)
-    Button buttonPiano;
-
-    @BindView(R.id.button_vibraphone)
-    Button buttonVibraphone;
-
     @OnClick(R.id.button_play)
     void onClickPlay() {
         canPlay = !canPlay;
         buttonPlay.setText(canPlay ? R.string.button_pause : R.string.button_play);
     }
-
-    /*@OnClick(R.id.button_piano)
-    void changeToPiano() {
-        changeInstrument(GeneralMidiConstants.ACOUSTIC_GRAND_PIANO);
-    }
-
-    @OnClick(R.id.button_vibraphone)
-    void changeToVibraphone() {
-        changeInstrument(GeneralMidiConstants.VIBRAPHONE);
-    }*/
 
     @State
     int currentNoteNumber;
@@ -73,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     private MidiDriver midiDriver;
     private byte[] event;
-    // private byte currentInstrument;
 
     private NoteUtil.Note previousNote = INVALID;
     private int sameNoteCount;
@@ -133,14 +118,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final Field[] things = GeneralMidiConstants.class.getFields();
+        InstrumentAdapter adapter = new InstrumentAdapter(this, things);
+        instrSelect.setAdapter(adapter);
         instrSelect.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0){
-                    changeInstrument(GeneralMidiConstants.ACOUSTIC_GRAND_PIANO);
-                }
-                else if (position == 1){
-                    changeInstrument((GeneralMidiConstants.VIBRAPHONE));
+                try {
+                    changeInstrument(things[position].getByte(GeneralMidiConstants.class));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
                 }
             }
 
