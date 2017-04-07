@@ -72,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
     private NoteUtil.Note previousNote = NoteUtil.Note.INVALID;
     private int sameNoteCount;
 
-    private float pastZAngle;
-    private int sameAngleCount;
-
     private boolean isHoldingNote;
     private boolean canPlay;
 
@@ -215,12 +212,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void pitchBend(float angle) {
-        if(angle != pastZAngle) {
-            sameAngleCount = 0;
+        int middleValue = 0x20;
+        float atanMax = (float) (Math.PI / 2.0);
+        event = new byte[3];
+        event[0] = (byte) 0xE0;
+        if(angle > 0) {
+            byte ratio = (byte) ((int) (angle / atanMax) * middleValue + middleValue);
+            event[1] = (byte) middleValue;
+            event[2] = (byte) ratio;
         } else {
-            sameAngleCount++;
+            byte ratio = (byte) ((int) (angle / atanMax) * middleValue + middleValue);
+            event[1] = (byte) ratio;
+            event[2] = (byte) middleValue;
         }
-        pastZAngle = angle;
+        midiDriver.write(event);
     }
 
     private void changeInstrument(byte instrument){
