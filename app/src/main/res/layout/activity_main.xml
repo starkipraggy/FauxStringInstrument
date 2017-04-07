@@ -7,58 +7,30 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="fill"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="10">
 
-        <Button
-            android:id="@+id/button_piano"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/button_piano" />
-
-        <Button
-            android:id="@+id/button_vibraphone"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/button_vibraphone" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_octave"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            android:textSize="50sp"
-            tools:autoText="false"
-            tools:text="Octave" />
+            android:layout_gravity="fill"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            android:textSize="50sp"
-            tools:text="Note" />
+            <Button
+                android:id="@+id/button_piano"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/button_piano" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical">
+            <Button
+                android:id="@+id/button_vibraphone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/button_vibraphone" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/button_play"
@@ -73,6 +45,23 @@
             android:layout_height="124dp"
             android:layout_weight="1"
             android:text="@string/button_hold_note" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:layout_weight="5">
+
+            <TextView
+                android:id="@+id/tv_note"
+                android:layout_width="match_parent"
+                android:layout_height="125dp"
+                android:textAlignment="center"
+                android:textSize="50sp"
+                tools:text="Note" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -14,6 +14,7 @@ public class NoteUtil {
         A("A", 69),
         AS("A#/Bb", 70),
         B("B", 71),
+        HC("C", 72),
         INVALID("-", -1);
 
         public final int number;
@@ -37,7 +38,8 @@ public class NoteUtil {
             Note.GS,
             Note.A,
             Note.AS,
-            Note.B
+            Note.B,
+            Note.HC
     };
 
     public static Note getNote(float roll, float pitch) {

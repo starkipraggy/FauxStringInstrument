@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,13 +25,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icepick.State;
 
+import static cs4347.group1.fauxstringinstrument.NoteUtil.Note.INVALID;
+
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.tv_note)
     TextView tvNote;
-
-    @BindView(R.id.tv_octave)
-    TextView tvOctave;
 
     @BindView(R.id.button_hold_note)
     Button buttonHoldNote;
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private byte[] event;
     // private byte currentInstrument;
 
-    private NoteUtil.Note previousNote = NoteUtil.Note.INVALID;
+    private NoteUtil.Note previousNote = INVALID;
     private int sameNoteCount;
 
     private float pastZAngle;
@@ -154,14 +154,14 @@ public class MainActivity extends AppCompatActivity {
             if (octaveChangingTime == 0) {
                 octaveChangingTime = System.nanoTime();
             }
-            if (Math.abs(pitch) < 40) {
+            if (Math.abs(pitch) < 30) {
                 octaveUp = true;
             }
         } else if (Math.abs(pitch) > 90) {
             if (octaveChangingTime == 0) {
                 octaveChangingTime = System.nanoTime();
             }
-            if (Math.abs(pitch) > 110) {
+            if (Math.abs(pitch) > 120) {
                 octaveDown = true;
             }
         } else {
@@ -206,10 +206,15 @@ public class MainActivity extends AppCompatActivity {
                 currentNoteNumber = newNoteNumber;
                 playNote(currentNoteNumber);
             }
-            String octDisplay = String.format(Locale.UK,"Octave: %d", currentOctave+3);
-            tvOctave.setText(octDisplay);
-            String noteDisplay = String.format(Locale.UK,"Note: %s", note.name);
-            tvNote.setText(noteDisplay);
+
+            String noteDisplay;
+            if (note != INVALID) {
+                noteDisplay = String.format(Locale.UK, "%s<sub><small>%d</small></sub>", note.name, currentOctave + 3);
+            } else {
+                noteDisplay = String.format(Locale.UK, "%s", note.name);
+            }
+
+            tvNote.setText(Html.fromHtml(noteDisplay));
         }
         previousNote = note;
     }
