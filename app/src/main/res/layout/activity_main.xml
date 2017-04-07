@@ -45,14 +45,15 @@
             android:layout_height="0dp"
             android:gravity="bottom"
             android:orientation="vertical"
-            android:layout_weight="5">
+            android:layout_weight="7">
 
             <TextView
                 android:id="@+id/tv_note"
                 android:layout_width="match_parent"
-                android:layout_height="125dp"
+                android:layout_height="124dp"
                 android:textAlignment="center"
                 android:textSize="50sp"
+                android:gravity="center"
                 tools:text="Note" />
 
         </LinearLayout>

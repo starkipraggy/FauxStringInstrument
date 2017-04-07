@@ -30,6 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icepick.State;
 
+import static cs4347.group1.fauxstringinstrument.NoteUtil.Note.HC;
 import static cs4347.group1.fauxstringinstrument.NoteUtil.Note.INVALID;
 
 public class MainActivity extends AppCompatActivity {
@@ -214,10 +215,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String noteDisplay;
-            if (note != INVALID) {
+            if (note != HC) {
                 noteDisplay = String.format(Locale.UK, "%s<sub><small>%d</small></sub>", note.name, currentOctave + 3);
             } else {
-                noteDisplay = String.format(Locale.UK, "%s", note.name);
+                noteDisplay = String.format(Locale.UK, "%s<sub><small>%d</small></sub>", note.name, currentOctave + 4);
             }
 
             tvNote.setText(Html.fromHtml(noteDisplay));
