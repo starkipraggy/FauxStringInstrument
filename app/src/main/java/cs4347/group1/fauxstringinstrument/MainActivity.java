@@ -13,7 +13,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import org.billthefarmer.mididriver.GeneralMidiConstants;
 import org.billthefarmer.mididriver.MidiDriver;
@@ -38,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.button_play)
     Button buttonPlay;
 
+    @BindView(R.id.spinner)
+    Spinner instrSelect;
+
     @BindView(R.id.button_piano)
     Button buttonPiano;
 
@@ -50,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         buttonPlay.setText(canPlay ? R.string.button_pause : R.string.button_play);
     }
 
-    @OnClick(R.id.button_piano)
+    /*@OnClick(R.id.button_piano)
     void changeToPiano() {
         changeInstrument(GeneralMidiConstants.ACOUSTIC_GRAND_PIANO);
     }
@@ -58,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.button_vibraphone)
     void changeToVibraphone() {
         changeInstrument(GeneralMidiConstants.VIBRAPHONE);
-    }
+    }*/
 
     @State
     int currentNoteNumber;
@@ -125,6 +131,22 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             }
+        });
+
+        instrSelect.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0){
+                    changeInstrument(GeneralMidiConstants.ACOUSTIC_GRAND_PIANO);
+                }
+                else if (position == 1){
+                    changeInstrument((GeneralMidiConstants.VIBRAPHONE));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) { }
+
         });
     }
 
